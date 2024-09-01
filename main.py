@@ -9,7 +9,7 @@ pygame.init()
 
 # Define constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
-LAND_Y_POSITION = SCREEN_HEIGHT - 100
+LAND_Y_POSITION = SCREEN_HEIGHT - 65
 POWER_UP_SIZE = 30
 POWER_UP_INTERVAL = 5000  # 5 seconds in milliseconds
 ENEMY_SPAWN_INTERVAL_MIN = 4000  # 4 seconds in milliseconds
