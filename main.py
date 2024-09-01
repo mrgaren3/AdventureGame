@@ -1,31 +1,12 @@
-import pygame
-import sys
-import random
-from player.player import Player, PowerUp
+import pygame,sys,random
+from player.player import *
 from settinges import *
 
 # Initialize Pygame
 pygame.init()
 
-# Define constants
-
-
-# Load the background image
-background_image = pygame.image.load('background.jpg')
-background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
-# Create the screen object
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Adventure Game")
-
 # Initialize the player
 player = Player(SCREEN_WIDTH, LAND_Y_POSITION)
-
-# Create initial power-ups
-power_ups = [
-    PowerUp(random.randint(0, SCREEN_WIDTH - POWER_UP_SIZE), LAND_Y_POSITION - POWER_UP_SIZE - 50, 'health'),
-    PowerUp(random.randint(0, SCREEN_WIDTH - POWER_UP_SIZE), LAND_Y_POSITION - POWER_UP_SIZE - 150, 'speed')
-]
 
 # Timer for spawning new power-ups
 last_spawn_time = pygame.time.get_ticks()
