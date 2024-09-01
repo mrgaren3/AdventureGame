@@ -30,5 +30,22 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 
+def playerMethod(player):
+    # Handle key presses for movement
+    keys = pygame.key.get_pressed()
+    player.handle_movement(keys)
 
+    # Apply gravity
+    player.apply_gravity()
 
+    # Check for land collision
+    player.check_land_collision()
+
+    # Prevent player from going out of bounds
+    player.prevent_out_of_bounds()
+
+    # Update the player's health
+    player.update_health()
+
+    # Check speed boost expiration
+    player.check_speed_boost()
