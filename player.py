@@ -11,11 +11,14 @@ PLAYER_SIZE = 50
 GRAVITY = 0.8
 JUMP_STRENGTH = 12
 PLAYER_SPEED = 3
+MAX_HEALTH = 100  # Maximum health for the player
 
 # Colors
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
 
 # Create the screen object
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -24,12 +27,83 @@ pygame.display.set_caption("Adventure Game")
 # Create the land (a green rectangle at the bottom of the screen)
 land = pygame.Rect(0, SCREEN_HEIGHT - LAND_HEIGHT, SCREEN_WIDTH, LAND_HEIGHT)
 
-# Create the player (a blue square)
-player = pygame.Rect(SCREEN_WIDTH//2 - PLAYER_SIZE//2, SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
-player_velocity_y = 0
-can_jump = True
-has_double_jumped = False
-on_ground = False
+
+class Player:
+    def __init__(self):
+        self.rect = pygame.Rect(SCREEN_WIDTH//2 - PLAYER_SIZE//2, SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
+        self.velocity_y = 0
+        self.can_jump = True
+        self.has_double_jumped = False
+        self.on_ground = False
+        self.health = MAX_HEALTH
+
+    def handle_movement(self, keys):
+        if keys[pygame.K_a]:  # Move left
+            self.rect.x -= PLAYER_SPEED
+        if keys[pygame.K_d]:  # Move right
+            self.rect.x += PLAYER_SPEED
+        if keys[pygame.K_s]:  # Move down (optional for vertical movement)
+            self.rect.y += PLAYER_SPEED
+
+        # Jump logic
+        if keys[pygame.K_SPACE] and self.can_jump:
+            if self.on_ground:
+                self.velocity_y = -JUMP_STRENGTH
+                self.on_ground = False
+                self.can_jump = False
+            elif not self.has_double_jumped:
+                self.velocity_y = -JUMP_STRENGTH
+                self.has_double_jumped = True
+                self.can_jump = False
+        if not keys[pygame.K_SPACE]:  # Reset jump ability when space is released
+            self.can_jump = True
+
+    def apply_gravity(self):
+        self.velocity_y += GRAVITY
+        self.rect.y += self.velocity_y
+
+    def check_land_collision(self):
+        if self.rect.colliderect(land):
+            self.rect.y = SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE
+            self.velocity_y = 0
+            self.on_ground = True
+            self.has_double_jumped = False  # Reset double jump ability when landing
+
+    def prevent_out_of_bounds(self):
+        if self.rect.x < 0:
+            self.rect.x = 0
+        elif self.rect.x + PLAYER_SIZE > SCREEN_WIDTH:
+            self.rect.x = SCREEN_WIDTH - PLAYER_SIZE
+
+        if self.rect.y < 0:
+            self.rect.y = 0
+
+    def update_health(self):
+        # Decrease health over time for demonstration purposes
+        if self.health > 0:
+            self.health -= 0.1
+        else:
+            self.health = 0
+
+    def draw_health_bar(self):
+        health_bar_width = 200
+        health_bar_height = 20
+        health_ratio = self.health / MAX_HEALTH
+        health_bar_color = RED if health_ratio < 0.3 else GREEN
+
+        # Draw the health bar border
+        pygame.draw.rect(screen, BLACK, (10, 10, health_bar_width + 4, health_bar_height + 4))
+        
+        # Draw the health bar itself
+        pygame.draw.rect(screen, health_bar_color, (12, 12, health_bar_width * health_ratio, health_bar_height))
+
+    def draw(self):
+        pygame.draw.rect(screen, BLUE, self.rect)
+        self.draw_health_bar()
+
+
+# Initialize the player
+player = Player()
 
 # Main game loop
 clock = pygame.time.Clock()
@@ -41,46 +115,19 @@ while True:
 
     # Handle key presses for movement
     keys = pygame.key.get_pressed()
-    
-    if keys[pygame.K_a]:  # Move left
-        player.x -= PLAYER_SPEED
-    if keys[pygame.K_d]:  # Move right
-        player.x += PLAYER_SPEED
-    if keys[pygame.K_s]:  # Move down (optional for vertical movement)
-        player.y += PLAYER_SPEED
-    
-    # Jump logic
-    if keys[pygame.K_SPACE] and can_jump:
-        if on_ground:
-            player_velocity_y = -JUMP_STRENGTH
-            on_ground = False
-            can_jump = False
-        elif not has_double_jumped:
-            player_velocity_y = -JUMP_STRENGTH
-            has_double_jumped = True
-            can_jump = False
-    if not keys[pygame.K_SPACE]:  # Reset jump ability when space is released
-        can_jump = True
+    player.handle_movement(keys)
 
     # Apply gravity
-    player_velocity_y += GRAVITY
-    player.y += player_velocity_y
+    player.apply_gravity()
 
-    # Check if the player is on the land
-    if player.colliderect(land):
-        player.y = SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE
-        player_velocity_y = 0
-        on_ground = True
-        has_double_jumped = False  # Reset double jump ability when landing
+    # Check for land collision
+    player.check_land_collision()
 
-    # Prevent the player from going out of bounds
-    if player.x < 0:
-        player.x = 0
-    elif player.x + PLAYER_SIZE > SCREEN_WIDTH:
-        player.x = SCREEN_WIDTH - PLAYER_SIZE
+    # Prevent player from going out of bounds
+    player.prevent_out_of_bounds()
 
-    if player.y < 0:
-        player.y = 0
+    # Update the player's health
+    player.update_health()
 
     # Fill the screen with white
     screen.fill(WHITE)
@@ -88,8 +135,8 @@ while True:
     # Draw the land
     pygame.draw.rect(screen, GREEN, land)
 
-    # Draw the player
-    pygame.draw.rect(screen, BLUE, player)
+    # Draw the player and health bar
+    player.draw()
 
     # Update the display
     pygame.display.flip()
