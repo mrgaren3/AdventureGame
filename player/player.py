@@ -1,6 +1,5 @@
 import pygame
 
-#ماما حلوة
 # Define constants
 PLAYER_SIZE = 50
 GRAVITY = 0.8
