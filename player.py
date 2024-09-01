@@ -30,14 +30,22 @@ land = pygame.Rect(0, SCREEN_HEIGHT - LAND_HEIGHT, SCREEN_WIDTH, LAND_HEIGHT)
 
 class Player:
     def __init__(self):
+        self.reset_player()
+        self.resetting = False
+
+    def reset_player(self):
         self.rect = pygame.Rect(SCREEN_WIDTH//2 - PLAYER_SIZE//2, SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
         self.velocity_y = 0
         self.can_jump = True
         self.has_double_jumped = False
         self.on_ground = False
         self.health = MAX_HEALTH
+        self.resetting = False
 
     def handle_movement(self, keys):
+        if self.resetting:
+            return  # Ignore movement if resetting
+
         if keys[pygame.K_a]:  # Move left
             self.rect.x -= PLAYER_SPEED
         if keys[pygame.K_d]:  # Move right
@@ -59,10 +67,16 @@ class Player:
             self.can_jump = True
 
     def apply_gravity(self):
+        if self.resetting:
+            return  # Skip gravity application if resetting
+
         self.velocity_y += GRAVITY
         self.rect.y += self.velocity_y
 
     def check_land_collision(self):
+        if self.resetting:
+            return  # Skip collision check if resetting
+
         if self.rect.colliderect(land):
             self.rect.y = SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE
             self.velocity_y = 0
@@ -70,6 +84,9 @@ class Player:
             self.has_double_jumped = False  # Reset double jump ability when landing
 
     def prevent_out_of_bounds(self):
+        if self.resetting:
+            return  # Skip bounds check if resetting
+
         if self.rect.x < 0:
             self.rect.x = 0
         elif self.rect.x + PLAYER_SIZE > SCREEN_WIDTH:
@@ -79,11 +96,15 @@ class Player:
             self.rect.y = 0
 
     def update_health(self):
+        if self.resetting:
+            return  # Skip health update if resetting
+
         # Decrease health over time for demonstration purposes
         if self.health > 0:
             self.health -= 0.1
         else:
             self.health = 0
+            self.resetting = True  # Set the resetting flag when health reaches 0
 
     def draw_health_bar(self):
         health_bar_width = 200
@@ -100,6 +121,10 @@ class Player:
     def draw(self):
         pygame.draw.rect(screen, BLUE, self.rect)
         self.draw_health_bar()
+
+    def reset_if_needed(self):
+        if self.resetting:
+            self.reset_player()
 
 
 # Initialize the player
@@ -128,6 +153,9 @@ while True:
 
     # Update the player's health
     player.update_health()
+
+    # Reset player if needed
+    player.reset_if_needed()
 
     # Fill the screen with white
     screen.fill(WHITE)
