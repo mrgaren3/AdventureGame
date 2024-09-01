@@ -1,5 +1,4 @@
 import pygame,random,sys
-from player.player import *
 
 # Define constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
