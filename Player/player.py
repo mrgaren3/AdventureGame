@@ -42,6 +42,8 @@ class Player:
         self.land_y_position = land_y_position
         self.speed = PLAYER_SPEED
         self.boost_start_time = None
+        self.current_frame = 0
+
 
         # Load player images
         self.load_images()
@@ -50,27 +52,47 @@ class Player:
         self.reset_player()
 
     def load_images(self):
-        # Load the player idle image
-        full_image = pygame.image.load('playerIdle.png').convert_alpha()
+    # Load the player idle image
+        full_image_idle = pygame.image.load('playerIdle.png').convert_alpha()
 
-        # Check the dimensions of the loaded image
-        img_width, img_height = full_image.get_size()
-        print(f"Loaded image size: {img_width}x{img_height}")
+        # Check the dimensions of the loaded idle image
+        img_width_idle, img_height_idle = full_image_idle.get_size()
+        print(f"Loaded idle image size: {img_width_idle}x{img_height_idle}")
 
-        # Extract the first frame (33x32) from the sprite sheet
-        if img_width >= 33 and img_height >= 32:
-            self.idle_image = full_image.subsurface(pygame.Rect(0, 0, 33, 32))
+        # Extract the first frame (33x32) from the idle sprite sheet
+        if img_width_idle >= 33 and img_height_idle >= 32:
+            self.idle_image = full_image_idle.subsurface(pygame.Rect(0, 0, 33, 32))
         else:
-            raise ValueError("The loaded image is smaller than the expected dimensions of 33x32.")
+            raise ValueError("The loaded idle image is smaller than the expected dimensions of 33x32.")
 
-        # Scale the image while maintaining the aspect ratio
-        scale_factor = PLAYER_SIZE / self.idle_image.get_height()
-        new_width = int(self.idle_image.get_width() * scale_factor)
-        self.idle_image = pygame.transform.scale(self.idle_image, (new_width, PLAYER_SIZE))
+        # Scale the idle image while maintaining the aspect ratio
+        scale_factor_idle = PLAYER_SIZE / self.idle_image.get_height()
+        new_width_idle = int(self.idle_image.get_width() * scale_factor_idle)
+        self.idle_image = pygame.transform.scale(self.idle_image, (new_width_idle, PLAYER_SIZE))
 
         # Create the flipped image for left direction
         self.idle_image_right = self.idle_image
         self.idle_image_left = pygame.transform.flip(self.idle_image_right, True, False)
+
+        # Load the player movement image
+        full_image_move = pygame.image.load('playerMove.png').convert_alpha()
+
+        # Check the dimensions of the loaded move image
+        img_width_move, img_height_move = full_image_move.get_size()
+        print(f"Loaded move image size: {img_width_move}x{img_height_move}")
+
+        # Assuming each frame is the same size, calculate the frame width
+        frame_width = img_width_move // 5  # 5 frames in the move animation
+
+        # Extract each frame and store in a list
+        self.move_images_right = []
+        for i in range(5):
+            frame = full_image_move.subsurface(pygame.Rect(i * 63 +20, 28, 24, img_height_move-28))
+            scaled_frame = pygame.transform.scale(frame, (new_width_idle, PLAYER_SIZE))
+            self.move_images_right.append(scaled_frame)
+
+        # Create the flipped images for left direction
+        self.move_images_left = [pygame.transform.flip(image, True, False) for image in self.move_images_right]
 
     def reset_player(self):
         self.rect = pygame.Rect(self.screen_width // 2 - self.idle_image.get_width() // 2, 
@@ -89,12 +111,22 @@ class Player:
         if self.resetting:
             return  # Ignore movement if resetting
 
+        moving = False
+
         if keys[pygame.K_a]:  # Move left
             self.rect.x -= self.speed
             self.facing_right = False
+            moving = True
         if keys[pygame.K_d]:  # Move right
             self.rect.x += self.speed
             self.facing_right = True
+            moving = True
+
+        # Update the current animation frame if the player is moving
+        if moving:
+            self.current_frame = (self.current_frame + 1) % len(self.move_images_right)
+        else:
+            self.current_frame = 0  # Reset to idle
 
         # Jump logic
         if keys[pygame.K_SPACE] and self.can_jump:
@@ -108,6 +140,21 @@ class Player:
                 self.can_jump = False
         if not keys[pygame.K_SPACE]:  # Reset jump ability when space is released
             self.can_jump = True
+
+    def draw(self, screen):
+        if self.facing_right:
+            if self.current_frame == 0:  # Idle frame
+                screen.blit(self.idle_image_right, self.rect)
+            else:  # Moving frames
+                screen.blit(self.move_images_right[self.current_frame], self.rect)
+        else:
+            if self.current_frame == 0:  # Idle frame
+                screen.blit(self.idle_image_left, self.rect)
+            else:  # Moving frames
+                screen.blit(self.move_images_left[self.current_frame], self.rect)
+        
+        self.draw_health_bar(screen)
+
 
     def apply_gravity(self):
         if self.resetting:
@@ -157,13 +204,6 @@ class Player:
         
         # Draw the health bar itself
         pygame.draw.rect(screen, health_bar_color, (12, 12, health_bar_width * health_ratio, health_bar_height))
-
-    def draw(self, screen):
-        if self.facing_right:
-            screen.blit(self.idle_image_right, self.rect)
-        else:
-            screen.blit(self.idle_image_left, self.rect)
-        self.draw_health_bar(screen)
 
     def reset_if_needed(self):
         if self.resetting:
