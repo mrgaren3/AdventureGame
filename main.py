@@ -1,7 +1,6 @@
-import pygame,sys,random
 from player.player import Player, PowerUp
 from Enemy.enemy import Enemy, ENEMY_SIZE
-from settinges import *
+from settings import *
 
 # Initialize Pygame
 pygame.init()

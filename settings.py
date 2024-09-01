@@ -1,4 +1,4 @@
-import pygame,random
+import pygame,random,sys
 from player.player import *
 
 # Define constants
