@@ -40,22 +40,50 @@ class Player:
     def __init__(self, screen_width, land_y_position):
         self.screen_width = screen_width
         self.land_y_position = land_y_position
-        self.reset_player()
-        self.resetting = False
         self.speed = PLAYER_SPEED
         self.boost_start_time = None
 
+        # Load player images
+        self.load_images()
+
+        # Initialize player
+        self.reset_player()
+
+    def load_images(self):
+        # Load the player idle image
+        full_image = pygame.image.load('playerIdle.png').convert_alpha()
+
+        # Check the dimensions of the loaded image
+        img_width, img_height = full_image.get_size()
+        print(f"Loaded image size: {img_width}x{img_height}")
+
+        # Extract the first frame (33x32) from the sprite sheet
+        if img_width >= 33 and img_height >= 32:
+            self.idle_image = full_image.subsurface(pygame.Rect(0, 0, 33, 32))
+        else:
+            raise ValueError("The loaded image is smaller than the expected dimensions of 33x32.")
+
+        # Scale the image while maintaining the aspect ratio
+        scale_factor = PLAYER_SIZE / self.idle_image.get_height()
+        new_width = int(self.idle_image.get_width() * scale_factor)
+        self.idle_image = pygame.transform.scale(self.idle_image, (new_width, PLAYER_SIZE))
+
+        # Create the flipped image for left direction
+        self.idle_image_right = self.idle_image
+        self.idle_image_left = pygame.transform.flip(self.idle_image_right, True, False)
+
     def reset_player(self):
-        self.rect = pygame.Rect(self.screen_width // 2 - PLAYER_SIZE // 2, self.land_y_position - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
+        self.rect = pygame.Rect(self.screen_width // 2 - self.idle_image.get_width() // 2, 
+                                self.land_y_position - PLAYER_SIZE, 
+                                self.idle_image.get_width(), 
+                                PLAYER_SIZE)
         self.velocity_y = 0
         self.can_jump = True
         self.has_double_jumped = False
         self.on_ground = False
         self.health = MAX_HEALTH
         self.resetting = False
-        self.speed = PLAYER_SPEED  # Reset the speed to default
-        self.boost_start_time = None  # Clear speed boost effect
-
+        self.facing_right = True  # Initial facing direction
 
     def handle_movement(self, keys):
         if self.resetting:
@@ -63,8 +91,10 @@ class Player:
 
         if keys[pygame.K_a]:  # Move left
             self.rect.x -= self.speed
+            self.facing_right = False
         if keys[pygame.K_d]:  # Move right
             self.rect.x += self.speed
+            self.facing_right = True
 
         # Jump logic
         if keys[pygame.K_SPACE] and self.can_jump:
@@ -102,8 +132,8 @@ class Player:
 
         if self.rect.x < 0:
             self.rect.x = 0
-        elif self.rect.x + PLAYER_SIZE > self.screen_width:
-            self.rect.x = self.screen_width - PLAYER_SIZE
+        elif self.rect.x + self.rect.width > self.screen_width:
+            self.rect.x = self.screen_width - self.rect.width
 
         if self.rect.y < 0:
             self.rect.y = 0
@@ -111,7 +141,7 @@ class Player:
     def update_health(self):
         if self.resetting:
             return  # Skip health update if resetting
- 
+
         if self.health < 0:
             self.health = 0
             self.resetting = True  # Set the resetting flag when health reaches 0
@@ -129,7 +159,10 @@ class Player:
         pygame.draw.rect(screen, health_bar_color, (12, 12, health_bar_width * health_ratio, health_bar_height))
 
     def draw(self, screen):
-        pygame.draw.rect(screen, BLUE, self.rect)
+        if self.facing_right:
+            screen.blit(self.idle_image_right, self.rect)
+        else:
+            screen.blit(self.idle_image_left, self.rect)
         self.draw_health_bar(screen)
 
     def reset_if_needed(self):
@@ -146,24 +179,3 @@ class Player:
             if elapsed_time > SPEED_BOOST_DURATION:
                 self.speed = PLAYER_SPEED
                 self.boost_start_time = None
-
-
-def playerMethod(player):
-    # Handle key presses for movement
-    keys = pygame.key.get_pressed()
-    player.handle_movement(keys)
-
-    # Apply gravity
-    player.apply_gravity()
-
-    # Check for land collision
-    player.check_land_collision()
-
-    # Prevent player from going out of bounds
-    player.prevent_out_of_bounds()
-
-    # Update the player's health
-    player.update_health()
-
-    # Check speed boost expiration
-    player.check_speed_boost()
