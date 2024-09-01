@@ -1,5 +1,6 @@
 import pygame
 
+#TEST TYPE SHIIIIT
 # Define constants
 PLAYER_SIZE = 50
 GRAVITY = 0.8
