@@ -1,8 +1,8 @@
 import pygame
 import sys
 import random
-from player import Player, PowerUp
-from enemy import Enemy, ENEMY_SIZE
+from player.player import Player, PowerUp
+from Enemy.enemy import Enemy, ENEMY_SIZE
 
 # Initialize Pygame
 pygame.init()

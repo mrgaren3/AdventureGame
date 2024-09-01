@@ -46,13 +46,16 @@ class Player:
         self.boost_start_time = None
 
     def reset_player(self):
-        self.rect = pygame.Rect(self.screen_width//2 - PLAYER_SIZE//2, self.land_y_position - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
+        self.rect = pygame.Rect(self.screen_width // 2 - PLAYER_SIZE // 2, self.land_y_position - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
         self.velocity_y = 0
         self.can_jump = True
         self.has_double_jumped = False
         self.on_ground = False
         self.health = MAX_HEALTH
         self.resetting = False
+        self.speed = PLAYER_SPEED  # Reset the speed to default
+        self.boost_start_time = None  # Clear speed boost effect
+
 
     def handle_movement(self, keys):
         if self.resetting:
@@ -108,11 +111,8 @@ class Player:
     def update_health(self):
         if self.resetting:
             return  # Skip health update if resetting
-
-        # Decrease health over time for demonstration purposes
-        if self.health > 0:
-            self.health -= 0.1
-        else:
+ 
+        if self.health < 0:
             self.health = 0
             self.resetting = True  # Set the resetting flag when health reaches 0
 
