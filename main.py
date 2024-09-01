@@ -7,7 +7,6 @@ from Enemy.enemy import Enemy, ENEMY_SIZE
 # Initialize Pygame
 pygame.init()
 
-#asfkjaspfsaf
 # Define constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 LAND_Y_POSITION = SCREEN_HEIGHT - 65
