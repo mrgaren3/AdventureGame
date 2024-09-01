@@ -1,5 +1,4 @@
 import pygame
-import random
 
 # Define constants for enemies
 ENEMY_SIZE = 50  # Make sure this matches the size you want for your enemies
