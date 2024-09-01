@@ -16,4 +16,19 @@ background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREE
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Adventure Game")
 
+# Colors
+PLAYER_COLOR = (0, 0, 255)  # Blue
+HEALTH_COLOR = (0, 255, 0)  # Green
+SPEED_COLOR = (255, 255, 0)  # Yellow
+ENEMY_COLOR = (0, 0, 0)  # Black
+BULLET_COLOR = (255, 0, 0)  # Red
+DOOR_COLOR = (0, 255, 0)  # Green
+
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+
+
 

@@ -1,4 +1,4 @@
-from player.player import Player, PowerUp
+from Player.player import Player, PowerUp
 from Enemy.enemy import Enemy, ENEMY_SIZE
 from settings import *
 
