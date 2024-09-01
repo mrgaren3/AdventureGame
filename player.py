@@ -111,11 +111,8 @@ class Player:
     def update_health(self):
         if self.resetting:
             return  # Skip health update if resetting
-
-        # Decrease health over time for demonstration purposes
-        if self.health > 0:
-            self.health -= 0.1
-        else:
+ 
+        if self.health < 0:
             self.health = 0
             self.resetting = True  # Set the resetting flag when health reaches 0
 
