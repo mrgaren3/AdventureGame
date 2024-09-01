@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-from player import Player, PowerUp
+from player.player import Player, PowerUp
 from settinges import *
 
 # Initialize Pygame
