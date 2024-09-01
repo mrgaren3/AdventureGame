@@ -2,15 +2,13 @@ import pygame
 import sys
 import random
 from player import Player, PowerUp
+from settinges import *
 
 # Initialize Pygame
 pygame.init()
 
 # Define constants
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
-LAND_Y_POSITION = SCREEN_HEIGHT - 100
-POWER_UP_SIZE = 30
-POWER_UP_INTERVAL = 5000  # 5 seconds in milliseconds
+
 
 # Load the background image
 background_image = pygame.image.load('background.jpg')
