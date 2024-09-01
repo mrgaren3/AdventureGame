@@ -6,7 +6,6 @@ pygame.init()
 
 # Define constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
-LAND_HEIGHT = 100
 PLAYER_SIZE = 50
 GRAVITY = 0.8
 JUMP_STRENGTH = 12
@@ -15,18 +14,21 @@ MAX_HEALTH = 100  # Maximum health for the player
 
 # Colors
 WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+
+# Load the background image
+background_image = pygame.image.load('background.jpg')
+background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Create the screen object
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Adventure Game")
 
-# Create the land (a green rectangle at the bottom of the screen)
-land = pygame.Rect(0, SCREEN_HEIGHT - LAND_HEIGHT, SCREEN_WIDTH, LAND_HEIGHT)
-
+# Determine the land area position
+LAND_Y_POSITION = SCREEN_HEIGHT - 60  # Adjust this value based on where the land starts in your background
 
 class Player:
     def __init__(self):
@@ -34,7 +36,7 @@ class Player:
         self.resetting = False
 
     def reset_player(self):
-        self.rect = pygame.Rect(SCREEN_WIDTH//2 - PLAYER_SIZE//2, SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
+        self.rect = pygame.Rect(SCREEN_WIDTH//2 - PLAYER_SIZE//2, LAND_Y_POSITION - PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE)
         self.velocity_y = 0
         self.can_jump = True
         self.has_double_jumped = False
@@ -50,8 +52,6 @@ class Player:
             self.rect.x -= PLAYER_SPEED
         if keys[pygame.K_d]:  # Move right
             self.rect.x += PLAYER_SPEED
-        if keys[pygame.K_s]:  # Move down (optional for vertical movement)
-            self.rect.y += PLAYER_SPEED
 
         # Jump logic
         if keys[pygame.K_SPACE] and self.can_jump:
@@ -77,8 +77,8 @@ class Player:
         if self.resetting:
             return  # Skip collision check if resetting
 
-        if self.rect.colliderect(land):
-            self.rect.y = SCREEN_HEIGHT - LAND_HEIGHT - PLAYER_SIZE
+        if self.rect.bottom > LAND_Y_POSITION:
+            self.rect.bottom = LAND_Y_POSITION
             self.velocity_y = 0
             self.on_ground = True
             self.has_double_jumped = False  # Reset double jump ability when landing
@@ -157,11 +157,8 @@ while True:
     # Reset player if needed
     player.reset_if_needed()
 
-    # Fill the screen with white
-    screen.fill(WHITE)
-
-    # Draw the land
-    pygame.draw.rect(screen, GREEN, land)
+    # Fill the screen with the background image
+    screen.blit(background_image, (0, 0))
 
     # Draw the player and health bar
     player.draw()
